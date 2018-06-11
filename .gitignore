@@ -1,0 +1,27 @@
+# Idea
+*.iws
+*.iml
+*.ipr
+.idea/
+log/
+
+# Mac specific
+.DS_Store
+
+# maven
+target/
+
+# Eclipse
+**/.cache
+**/.classpath
+**/.eclipse_classes
+**/.project
+**/.sass-cache
+**/.scala_dependencies
+**/.settings
+
+# Others
+out/
+.sass-cache/
+javarebel.stats
+jrebel.info

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>Weather App</title>
+    <meta http-equiv="refresh" content="5"/>
+</head>
+<h1>Weather Summary</h1>
+<h2><span th:text="'Current weather is : ' "></span></h2>
+
+
+<tr th:each="weather : ${summary}">
+    <h3>
+        <span style="color:red;"><td th:text="${weather.errorMessageUI}" ></td></span>
+    </h3>
+    <div th:if="${weather.city != null}">
+    <h2><span
+            th:text="'-------------------------------------------------------------------------------' "></span>
+    </h2>
+    <h3>
+        <td th:text="${weather.city}"></td>
+    </h3>
+
+        <td th:text="${weather.temp}"></td>°C
+    </div>
+    <div th:if="${weather.alerts != null}">
+        <h4><span th:text="'Alerts : '"></span></h4>
+        <ul>
+            <th:block th:object="${weather}">
+                <li th:each="item : *{alerts}" th:text="${item}" style="color:red;"></li>
+            </th:block>
+        </ul>
+    </div>
+</tr>
+
+<h2><span th:text="'-------------------------------------------------------------------------------' "></span></h2>
+</body>
+</html>

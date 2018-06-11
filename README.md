@@ -1,0 +1,1 @@
+A program that monitors weather forecasts for specific locations
