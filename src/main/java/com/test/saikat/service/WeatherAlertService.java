@@ -10,12 +10,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.test.saikat.properties.ApplicationConstants.HIGH_TEMP_WEATHER_ALERT;
-import static com.test.saikat.properties.ApplicationConstants.WEATHER_LOG_NORMAL;
+import static com.test.saikat.properties.ApplicationConstants.*;
 
 /**
  * The class to validate next 5 days temperature and log possible alerts
@@ -37,11 +35,13 @@ public class WeatherAlertService {
         Alert alertToLog = new Alert();
         alertToLog.setLocation(weatherParam.getCityName());
         weatherParam.getTempParams().forEach(tempParam -> {
-            AlertData alertData = returnAlertIfTemperatureLimitExceeds(tempParam, weatherParam.getCityName(), highTempLimit);
+            AlertData alertData = returnAlertIfTemperatureLimitExceeds(tempParam, highTempLimit);
             if (null != alertData) {
                 alertToLog.getAlerts().add(alertData);
             }
         });
+
+        // Log alert data in JSON and return alert string for UI
         if (!alertToLog.getAlerts().isEmpty()) {
             logAlert(alertToLog);
             return alertToLog.getAlerts().stream().map(alertData -> alertData.getAlertTextForUI()).collect(Collectors.toList());
@@ -55,18 +55,11 @@ public class WeatherAlertService {
      * The method compares future weather conditions with configured limit and logs correspondingly
      *
      * @param tempParam
-     * @param cityName
      * @return AlertData
      */
-    private AlertData returnAlertIfTemperatureLimitExceeds(final TempParam tempParam, final String cityName, final double highTempLimit) {
-        Instant forecastTime = tempParam.getTimestamp();
+    private AlertData returnAlertIfTemperatureLimitExceeds(final TempParam tempParam, final double highTempLimit) {
         if (tempParam.getMaxTemp() > highTempLimit) {
-            AlertData alertData = new AlertData();
-            String alertText = HIGH_TEMP_WEATHER_ALERT + highTempLimit + "°C on " + forecastTime.toString() + " UTC";
-            alertData.setAlertTextForUI(alertText);
-            alertData.setMaximumTemperature(tempParam.getMaxTemp());
-            alertData.setAlertDateTime(tempParam.getTimestamp());
-            return alertData;
+            return buildAlertData(tempParam, highTempLimit);
         }
         return null;
     }
@@ -79,6 +72,22 @@ public class WeatherAlertService {
     private void logAlert(final Alert alert) {
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         String alertJson = gson.toJson(alert);
-        LOG.info("Alert Data :: \n{}", alertJson);
+        LOG.info(ALERT_TEXT, alert.getLocation(), alertJson);
+    }
+
+    /**
+     * Method to build AlertData when temperature exceeds defined limit
+     *
+     * @param tempParam
+     * @param highTempLimit
+     * @return AlertData
+     */
+    private AlertData buildAlertData(final TempParam tempParam, final double highTempLimit) {
+        AlertData alertData = new AlertData();
+        String alertText = HIGH_TEMP_WEATHER_ALERT + highTempLimit + "°C on " + tempParam.getTimestamp() + " UTC";
+        alertData.setAlertTextForUI(alertText);
+        alertData.setMaximumTemperature(tempParam.getMaxTemp());
+        alertData.setAlertDateTime(tempParam.getTimestamp());
+        return alertData;
     }
 }
