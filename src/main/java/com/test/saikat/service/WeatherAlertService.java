@@ -1,18 +1,20 @@
 package com.test.saikat.service;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.test.saikat.weather.Alert;
+import com.test.saikat.weather.AlertData;
 import com.test.saikat.weather.TempParam;
 import com.test.saikat.weather.WeatherParam;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.test.saikat.properties.ApplicationConstants.HIGH_TEMP_WEATHER_ALERT;
-import static com.test.saikat.properties.ApplicationConstants.HIGH_TEMP_WEATHER_ALERT_LOG;
 import static com.test.saikat.properties.ApplicationConstants.WEATHER_LOG_NORMAL;
 
 /**
@@ -32,15 +34,21 @@ public class WeatherAlertService {
      * @return List<String>
      */
     public List<String> validateFutureWeather(final WeatherParam weatherParam, final double highTempLimit) {
-        List<String> alerts = new ArrayList<>();
+        Alert alertToLog = new Alert();
+        alertToLog.setLocation(weatherParam.getCityName());
         weatherParam.getTempParams().forEach(tempParam -> {
-            String alert = logAlertsIfTemperatureLimitExceeds(tempParam, weatherParam.getCityName(), highTempLimit);
-            if (StringUtils.isNotEmpty(alert))
-                alerts.add(alert);
+            AlertData alertData = returnAlertIfTemperatureLimitExceeds(tempParam, weatherParam.getCityName(), highTempLimit);
+            if (null != alertData) {
+                alertToLog.getAlerts().add(alertData);
+            }
         });
-        if (alerts.isEmpty())
-            LOG.info(WEATHER_LOG_NORMAL, weatherParam.getCityName());
-        return alerts;
+        if (!alertToLog.getAlerts().isEmpty()) {
+            logAlert(alertToLog);
+            return alertToLog.getAlerts().stream().map(alertData -> alertData.getAlertTextForUI()).collect(Collectors.toList());
+        }
+
+        LOG.info(WEATHER_LOG_NORMAL, weatherParam.getCityName());
+        return null;
     }
 
     /**
@@ -48,16 +56,29 @@ public class WeatherAlertService {
      *
      * @param tempParam
      * @param cityName
-     * @return String
+     * @return AlertData
      */
-    private String logAlertsIfTemperatureLimitExceeds(final TempParam tempParam, final String cityName, final double highTempLimit) {
-        String alertText = StringUtils.EMPTY;
+    private AlertData returnAlertIfTemperatureLimitExceeds(final TempParam tempParam, final String cityName, final double highTempLimit) {
         Instant forecastTime = tempParam.getTimestamp();
         if (tempParam.getMaxTemp() > highTempLimit) {
-            LOG.info(HIGH_TEMP_WEATHER_ALERT_LOG, cityName, forecastTime);
-            alertText = HIGH_TEMP_WEATHER_ALERT + highTempLimit + "°C on " + forecastTime.toString() + " UTC";
-            // TODO email alert service
+            AlertData alertData = new AlertData();
+            String alertText = HIGH_TEMP_WEATHER_ALERT + highTempLimit + "°C on " + forecastTime.toString() + " UTC";
+            alertData.setAlertTextForUI(alertText);
+            alertData.setMaximumTemperature(tempParam.getMaxTemp());
+            alertData.setAlertDateTime(tempParam.getTimestamp());
+            return alertData;
         }
-        return alertText;
+        return null;
+    }
+
+    /**
+     * Method to log the alert in json format
+     *
+     * @param alert
+     */
+    private void logAlert(final Alert alert) {
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        String alertJson = gson.toJson(alert);
+        LOG.info("Alert Data :: \n{}", alertJson);
     }
 }

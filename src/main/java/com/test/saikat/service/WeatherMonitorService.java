@@ -77,7 +77,9 @@ public class WeatherMonitorService {
 
                 TempParam currentWeatherParameters = fetch(city, apiKey, TempParam.class, CURRENT_WEATHER_URL);
                 WeatherSummary cityWeatherSummary = new WeatherSummary(city, currentWeatherParameters.getTemp());
-                cityWeatherSummary.setAlerts(futureWeatherAlerts);
+
+                if (null != futureWeatherAlerts)
+                    cityWeatherSummary.setAlerts(futureWeatherAlerts);
 
                 weatherSummaries.add(cityWeatherSummary);
             });

@@ -8,6 +8,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.List;
 
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 
@@ -29,7 +30,7 @@ public class WeatherAlertServiceTest {
     public void testValidateFutureWeatherPermisible() {
         WeatherAlertService service = new WeatherAlertService();
         List<String> alerts = service.validateFutureWeather(TestUtils.buildWeatherParam(), 55.0);
-        assertTrue(alerts.isEmpty());
+        assertNull(alerts);
     }
 
 }
