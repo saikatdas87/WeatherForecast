@@ -3,6 +3,7 @@ package com.test.saikat;
 import com.test.saikat.service.WeatherMonitorService;
 import com.test.saikat.weather.WeatherSummary;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -27,6 +28,7 @@ public class WeatherForecastController {
     private WeatherMonitorService weatherMonitorService;
 
     @RequestMapping(method = RequestMethod.GET)
+    @Scheduled(fixedDelayString = "${weather.monitor.app.schedule.period}000")
     public ModelAndView getWeather() {
         List<WeatherSummary> weatherSummaries = weatherMonitorService.monitorWeatherForecast();
         Map<String, Object> model = new HashMap<>();
