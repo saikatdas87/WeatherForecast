@@ -1,8 +1,8 @@
-A program that monitors weather forecasts for specific locations and logs alert data in log
+## A program that monitors weather forecasts for specific locations and logs alert data in log
 
-###To run the program please configure the application.properties
+### To run the program please configure the application.properties
 
-####The API key shall be generated from https://openweathermap.org/api and put here
+#### The API key shall be generated from https://openweathermap.org/api and put here
 weather.monitor.app.api.key=
 
 #### Set the max temp which needs to be monitored for next 5 days
