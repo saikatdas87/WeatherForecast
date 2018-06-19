@@ -12,6 +12,7 @@ import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
@@ -52,6 +53,7 @@ public class WeatherMonitorService {
      *
      * @return List<WeatherSummary>
      */
+    @Scheduled(fixedDelayString = "${weather.monitor.app.schedule.period}000")
     public List<WeatherSummary> monitorWeatherForecast() {
         List<WeatherParam> weatherForecastParamsList = new ArrayList<>();
         List<WeatherSummary> weatherSummaries = new ArrayList<>();
